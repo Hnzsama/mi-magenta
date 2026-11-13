@@ -20,16 +20,22 @@ export default function MagangPage() {
   return (
     <div className="min-h-screen py-10 sm:py-14">
       <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-8">
-        <div className="rounded-2xl border bg-gradient-to-r from-blue-500/10 via-background to-background p-6 sm:p-10 shadow-sm space-y-4">
-          <div className="inline-flex items-center gap-1.5 rounded-full border bg-background/80 px-3 py-1 text-xs font-semibold text-primary">
-            <Briefcase size={16} /> Magang Kerja Praktik &amp; Industri
+        <div className="relative overflow-hidden rounded-2xl border border-[var(--mi-blue)]/25 bg-gradient-to-br from-blue-100/80 via-sky-50/60 to-background p-6 sm:p-10 shadow-sm dark:border-border dark:from-blue-950/40 dark:via-background dark:to-background space-y-4">
+          {/* Subtle decorative glow */}
+          <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-[var(--mi-cyan)]/20 dark:bg-[var(--mi-blue)]/15 blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-16 -left-16 w-64 h-64 rounded-full bg-[var(--mi-blue)]/15 dark:bg-transparent blur-3xl pointer-events-none" />
+
+          <div className="relative space-y-4">
+            <div className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-background/90 px-3 py-1 text-xs font-semibold text-primary shadow-2xs backdrop-blur">
+              <Briefcase size={16} className="text-[var(--mi-orange)]" /> Magang Kerja Praktik &amp; Industri
+            </div>
+            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground">
+              Peluang Magang Industri Mahasiswa
+            </h1>
+            <p className="text-sm sm:text-base text-muted-foreground max-w-3xl leading-relaxed">
+              Praktik kerja nyata di instansi pemerintah, BUMN strategis, dan korporasi swasta. Mendukung pendaftaran perorangan (Mandiri) maupun per kelompok (Tim).
+            </p>
           </div>
-          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
-            Peluang Magang Industri Mahasiswa
-          </h1>
-          <p className="text-sm sm:text-base text-muted-foreground max-w-3xl leading-relaxed">
-            Praktik kerja nyata di instansi pemerintah, BUMN strategis, dan korporasi swasta. Mendukung pendaftaran perorangan (Mandiri) maupun per kelompok (Tim).
-          </p>
         </div>
 
         <OpportunityList initialItems={magangItems} defaultType="magang" />

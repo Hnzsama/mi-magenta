@@ -119,7 +119,7 @@ export default function Home() {
                       <p className="text-xs text-muted-foreground">Prodi Manajemen Informatika</p>
                     </div>
                   </div>
-                  <Badge variant="outline" className="text-emerald-600 bg-emerald-50/80 border-emerald-200">
+                  <Badge variant="outline" className="text-emerald-600 bg-emerald-50/80 border-emerald-200 dark:text-emerald-400 dark:bg-emerald-950/60 dark:border-emerald-800">
                     Terverifikasi
                   </Badge>
                 </div>
@@ -209,7 +209,7 @@ export default function Home() {
                   <span className="flex items-center gap-1 truncate">
                     <MapPin size={12} className="text-primary/70 shrink-0" /> {p.city}
                   </span>
-                  <span className="text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-1.5 py-0.2 rounded">
+                  <span className="text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded dark:text-emerald-400 dark:bg-emerald-950/60">
                     Mitra
                   </span>
                 </div>
