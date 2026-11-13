@@ -1,0 +1,181 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-mono);
+  --font-heading: var(--font-mono);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+
+  /* Brand Palette Variables from MI Logo */
+  --color-mi-blue: var(--mi-blue);
+  --color-mi-cyan: var(--mi-cyan);
+  --color-mi-yellow: var(--mi-yellow);
+  --color-mi-orange: var(--mi-orange);
+  --color-mi-navy: var(--mi-navy);
+
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+:root {
+  --background: oklch(0.995 0.005 240);
+  --foreground: oklch(0.18 0.03 245);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.18 0.03 245);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.18 0.03 245);
+
+  /* Primary MI Brand Blue */
+  --primary: oklch(0.52 0.16 242);
+  --primary-foreground: oklch(0.99 0 0);
+
+  /* Secondary subtle cyan/tint */
+  --secondary: oklch(0.965 0.025 220);
+  --secondary-foreground: oklch(0.35 0.12 240);
+
+  --muted: oklch(0.97 0.01 240);
+  --muted-foreground: oklch(0.52 0.03 245);
+  --accent: oklch(0.96 0.03 220);
+  --accent-foreground: oklch(0.3 0.12 240);
+
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.92 0.01 240);
+  --input: oklch(0.92 0.01 240);
+  --ring: oklch(0.65 0.15 235);
+
+  /* Distinct Logo Characteristic Colors */
+  --mi-cyan: #1aaadd;
+  --mi-blue: #2270ad;
+  --mi-navy: #1b3577;
+  --mi-yellow: #f5c114;
+  --mi-orange: #f28b18;
+
+  --chart-1: oklch(0.65 0.16 230);
+  --chart-2: oklch(0.75 0.18 85);
+  --chart-3: oklch(0.45 0.15 250);
+  --chart-4: oklch(0.68 0.19 50);
+  --chart-5: oklch(0.35 0.1 240);
+
+  --radius: 0.625rem;
+  --sidebar: oklch(0.99 0.005 240);
+  --sidebar-foreground: oklch(0.18 0.03 245);
+  --sidebar-primary: oklch(0.52 0.16 242);
+  --sidebar-primary-foreground: oklch(0.99 0 0);
+  --sidebar-accent: oklch(0.96 0.03 220);
+  --sidebar-accent-foreground: oklch(0.3 0.12 240);
+  --sidebar-border: oklch(0.92 0.01 240);
+  --sidebar-ring: oklch(0.65 0.15 235);
+}
+
+.dark {
+  --background: oklch(0.14 0.03 245);
+  --foreground: oklch(0.985 0.01 240);
+  --card: oklch(0.18 0.03 245);
+  --card-foreground: oklch(0.985 0.01 240);
+  --popover: oklch(0.18 0.03 245);
+  --popover-foreground: oklch(0.985 0.01 240);
+
+  --primary: oklch(0.68 0.15 235);
+  --primary-foreground: oklch(0.12 0.04 245);
+
+  --secondary: oklch(0.25 0.05 240);
+  --secondary-foreground: oklch(0.95 0.02 240);
+
+  --muted: oklch(0.22 0.03 245);
+  --muted-foreground: oklch(0.72 0.03 240);
+  --accent: oklch(0.25 0.05 240);
+  --accent-foreground: oklch(0.95 0.02 240);
+
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 12%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.6 0.14 235);
+
+  --chart-1: oklch(0.65 0.16 230);
+  --chart-2: oklch(0.75 0.18 85);
+  --chart-3: oklch(0.45 0.15 250);
+  --chart-4: oklch(0.68 0.19 50);
+  --chart-5: oklch(0.35 0.1 240);
+
+  --sidebar: oklch(0.16 0.03 245);
+  --sidebar-foreground: oklch(0.985 0.01 240);
+  --sidebar-primary: oklch(0.68 0.15 235);
+  --sidebar-primary-foreground: oklch(0.12 0.04 245);
+  --sidebar-accent: oklch(0.25 0.05 240);
+  --sidebar-accent-foreground: oklch(0.95 0.02 240);
+  --sidebar-border: oklch(1 0 0 / 12%);
+  --sidebar-ring: oklch(0.6 0.14 235);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Subtle, elegant gradients matching the MI logo characteristic */
+.bg-mi-gradient-subtle {
+  background: linear-gradient(
+    135deg,
+    rgba(26, 170, 221, 0.06) 0%,
+    rgba(34, 112, 173, 0.04) 50%,
+    rgba(245, 193, 20, 0.05) 100%
+  );
+}
+
+.bg-mi-card-glow {
+  background: radial-gradient(
+    circle at top right,
+    rgba(245, 193, 20, 0.07) 0%,
+    rgba(26, 170, 221, 0.05) 40%,
+    transparent 80%
+  );
+}
+
+.text-mi-gradient {
+  background: linear-gradient(120deg, #1aaadd 0%, #2270ad 50%, #f28b18 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}

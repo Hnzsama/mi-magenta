@@ -1,0 +1,282 @@
+[
+  {
+    "id": "stupen-celerates-da-1",
+    "type": "stupen",
+    "company": "PT Mitra Talenta Grup (Celerates)",
+    "slug": "pt-mitra-talenta-grup-celerates-data-analyst",
+    "roles": ["Data Analyst"],
+    "divisions": ["Data Analyst"],
+    "categories": ["Data & Analytics"],
+    "mode": "Mandiri",
+    "location": {
+      "city": "Jakarta Selatan",
+      "province": "DKI Jakarta",
+      "address": "The Manhattan Square Building, Mid Tower, 12th Floor Jl. TB Simatupang Kav 1-S. Cilandak Timur, Jakarta Selatan"
+    },
+    "contact": {
+      "phone": "6285545032916"
+    },
+    "batch": "Angkatan 2023 Semester Genap",
+    "description": "Program pembelajaran dan proyek industri fokus pada Data Analyst di Celerates (The Manhattan Square Building, Jakarta Selatan).",
+    "requirements": [
+      "Mahasiswa aktif Manajemen Informatika",
+      "Memahami dasar SQL, Spreadsheet, atau visualisasi data",
+      "Memiliki ketertarikan kuat dalam analisis data bisnis",
+      "Mampu berkomunikasi dan mempresentasikan temuan analisis dengan baik"
+    ]
+  },
+  {
+    "id": "stupen-celerates-web-uiux-1",
+    "type": "stupen",
+    "company": "PT Mitra Talenta Grup (Celerates)",
+    "slug": "pt-mitra-talenta-grup-celerates-web-development-ui-ux",
+    "roles": ["Web Development & UI/UX Design"],
+    "divisions": ["Web Development", "UI/UX Design"],
+    "categories": ["Software Engineering", "UI/UX Design"],
+    "mode": "Mandiri",
+    "location": {
+      "city": "Jakarta Selatan",
+      "province": "DKI Jakarta",
+      "address": "The Manhattan Square Building, Mid Tower, 12th Floor Jl. TB Simatupang Kav 1-S. Cilandak Timur, Jakarta Selatan"
+    },
+    "contact": {
+      "phone": "6285545032916"
+    },
+    "batch": "Angkatan 2023 Semester Genap",
+    "description": "Program pembelajaran dan proyek pengembangan Web Development & UI/UX Design di Celerates Jakarta Selatan.",
+    "requirements": [
+      "Mahasiswa aktif Manajemen Informatika",
+      "Familiar dengan dasar HTML, CSS, JavaScript atau prototyping Figma",
+      "Mampu bekerja sama dalam tim agile",
+      "Berkomitmen menyelesaikan milestone proyek tepat waktu"
+    ]
+  },
+  {
+    "id": "stupen-celerates-da-bi",
+    "type": "stupen",
+    "company": "PT Mitra Talenta Grup (Celerates)",
+    "slug": "pt-mitra-talenta-grup-celerates-business-intelligence",
+    "roles": ["Data Analyst & Business Intelligence"],
+    "divisions": ["Data Analyst", "Business Intelligence"],
+    "categories": ["Data & Analytics"],
+    "mode": "Mandiri",
+    "location": {
+      "city": "Jakarta Selatan",
+      "province": "DKI Jakarta",
+      "address": "The Manhattan Square Building, Mid Tower, 12th Floor Jl. TB Simatupang Kav 1-S. Cilandak Timur, Jakarta Selatan"
+    },
+    "contact": {
+      "phone": "6285545032916"
+    },
+    "batch": "Angkatan 2023 Semester Genap",
+    "description": "Program pembelajaran dan proyek industri bidang Data Analyst & Business Intelligence di Celerates Jakarta Selatan.",
+    "requirements": [
+      "Dasar pemahaman relational database & logika query",
+      "Analytical thinking dan kemampuan problem-solving",
+      "Ketertarikan pada pembuatan dashboard KPI & metriks bisnis"
+    ]
+  },
+  {
+    "id": "stupen-vinix7",
+    "type": "stupen",
+    "company": "PT Vinix Seven Aurum (Vinix7)",
+    "slug": "pt-vinix-seven-aurum-web-development-ui-ux",
+    "roles": ["Web Development & UI/UX Design"],
+    "divisions": ["Web Development", "UI/UX Design"],
+    "categories": ["Software Engineering", "UI/UX Design"],
+    "mode": "Mandiri",
+    "location": {
+      "city": "Sleman",
+      "province": "Daerah Istimewa Yogyakarta",
+      "address": "Jl. Watugede no. 58, Sleman, Yogyakarta"
+    },
+    "contact": {
+      "phone": "6287845611100"
+    },
+    "batch": "Angkatan 2023 Semester Genap",
+    "description": "Studi Independen pengembangan Web Development & UI/UX Design di PT Vinix Seven Aurum (Vinix7) Sleman, Yogyakarta.",
+    "requirements": [
+      "Menguasai dasar Modern Web atau UI/UX design di Figma",
+      "Memiliki portofolio karya atau mini project",
+      "Dapat beradaptasi dengan budaya kolaborasi software house"
+    ]
+  },
+  {
+    "id": "magang-wings-group",
+    "type": "magang",
+    "company": "PT WINGS SURYA DRY (WINGS GROUP)",
+    "slug": "pt-wings-surya-dry-hr-project",
+    "roles": ["HR PROJECT"],
+    "divisions": ["HR PROJECT"],
+    "categories": ["Human Resources"],
+    "mode": "Mandiri",
+    "location": {
+      "city": "Gresik",
+      "province": "Jawa Timur",
+      "address": "Driyorejo km 22,9, Dusun Driyorejo, Kec. Driyorejo, Kabupaten Gresik, Jawa Timur 61177"
+    },
+    "contact": {
+      "phone": "085136827214"
+    },
+    "batch": "Angkatan 2023 Semester Genap",
+    "description": "Praktik kerja magang industri divisi HR PROJECT di PT WINGS SURYA DRY (WINGS GROUP) Driyorejo, Gresik.",
+    "requirements": [
+      "Mahasiswa D3/D4 Manajemen Informatika",
+      "Menguasai pengelolaan data perkantoran (Spreadsheet/Excel)",
+      "Memiliki ketelitian tinggi dalam pengarsipan & administrasi data HR",
+      "Menjaga kerahasiaan dokumen internal perusahaan"
+    ]
+  },
+  {
+    "id": "magang-kominfo-kediri",
+    "type": "magang",
+    "company": "Dinas Komunikasi dan Informatika Kab. Kediri",
+    "slug": "diskominfo-kab-kediri-web-dev",
+    "roles": ["Web Dev"],
+    "divisions": ["Web Dev"],
+    "categories": ["Software Engineering"],
+    "mode": "Tim",
+    "location": {
+      "city": "Kediri",
+      "province": "Jawa Timur",
+      "address": "Jalan Sekartaji No. 2, Desa Doko, Kecamatan Ngasem, Kabupaten Kediri, Jawa Timur"
+    },
+    "contact": {
+      "phone": "81292561991"
+    },
+    "batch": "Angkatan 2023 Semester Genap",
+    "description": "Praktik kerja magang tim mahasiswa bidang Web Development di Dinas Komunikasi dan Informatika Kab. Kediri.",
+    "requirements": [
+      "Terbuka untuk pendaftaran Tim / Kelompok mahasiswa MI",
+      "Menguasai dasar pemrograman web (PHP / Framework / JavaScript)",
+      "Memahami pengelolaan database relasional",
+      "Disiplin mengikuti jadwal kedinasan Pemkab Kediri"
+    ]
+  },
+  {
+    "id": "magang-kominfo-nganjuk",
+    "type": "magang",
+    "company": "Dinas Komunikasi Dan Informatika Kab. Nganjuk",
+    "slug": "diskominfo-kab-nganjuk-divisi-ti",
+    "roles": ["Divisi Teknologi Informasi"],
+    "divisions": ["Divisi Teknologi Informasi"],
+    "categories": ["IT Support & Infrastructure"],
+    "mode": "Mandiri",
+    "location": {
+      "city": "Nganjuk",
+      "province": "Jawa Timur",
+      "address": "Jl. Merdeka No.21, Kel. Mangundikaran, Kec. Nganjuk, Kab. Nganjuk"
+    },
+    "contact": {
+      "phone": "(0358) 3550320"
+    },
+    "batch": "Angkatan 2023 Semester Genap",
+    "description": "Praktik kerja magang mandiri di Divisi Teknologi Informasi Dinas Komunikasi Dan Informatika Kab. Nganjuk.",
+    "requirements": [
+      "Pemahaman dasar troubleshooting komputer & jaringan",
+      "Etos kerja disiplin, rapi, dan santun di lingkungan instansi pemerintahan",
+      "Mampu bekerja secara mandiri dengan bimbingan staf IT senior"
+    ]
+  },
+  {
+    "id": "magang-telkom-malang",
+    "type": "magang",
+    "company": "PT Telkom Indonesia Witel Jatim Barat (Malang)",
+    "slug": "pt-telkom-indonesia-witel-jatim-barat-marketing-sales-operations",
+    "roles": ["Divisi Marketing, Sales & Operations"],
+    "divisions": ["Divisi Marketing", "Divisi Sales", "Divisi Operations"],
+    "categories": ["Marketing & Sales", "Operations"],
+    "mode": "Tim",
+    "location": {
+      "city": "Malang",
+      "province": "Jawa Timur",
+      "address": "Jl. Ahmad Yani No.11, Blimbing, Kec. Blimbing, Kota Malang, Jawa Timur 65125"
+    },
+    "contact": {
+      "phone": "82262200147"
+    },
+    "batch": "Angkatan 2023 Semester Genap",
+    "description": "Praktik kerja magang tim mahasiswa di Divisi Marketing, Sales & Operations PT Telkom Indonesia Witel Jatim Barat (Malang).",
+    "requirements": [
+      "Mahasiswa prodi Manajemen Informatika (terbuka untuk kelompok/tim)",
+      "Kemampuan rekapitulasi data penjualan & operasional produk digital",
+      "Kemampuan komunikasi dan koordinasi tim yang responsif"
+    ]
+  },
+  {
+    "id": "magang-keraton-karya-solusi",
+    "type": "magang",
+    "company": "CV. Keraton Karya Solusi",
+    "slug": "cv-keraton-karya-solusi-divisi-it",
+    "roles": ["Divisi IT"],
+    "divisions": ["Divisi IT"],
+    "categories": ["Information Technology"],
+    "mode": "Tim",
+    "location": {
+      "city": "Surabaya",
+      "province": "Jawa Timur",
+      "address": "No.8, Tenggilis Mejoyo, Kec. Tenggilis Mejoyo, Surabaya"
+    },
+    "contact": {
+      "phone": "628121009799"
+    },
+    "batch": "Angkatan 2023 Semester Genap",
+    "description": "Praktik kerja magang tim mahasiswa di Divisi IT CV. Keraton Karya Solusi Surabaya.",
+    "requirements": [
+      "Menguasai dasar web development atau IT support",
+      "Mampu bekerja sama dalam tim pengembangan software",
+      "Inisiatif belajar tinggi pada teknologi klien industri"
+    ]
+  },
+  {
+    "id": "magang-pal-indonesia",
+    "type": "magang",
+    "company": "PT PAL Indonesia",
+    "slug": "pt-pal-indonesia-divisi-teknologi-informasi",
+    "roles": ["Divisi Teknologi Informasi"],
+    "divisions": ["Divisi Teknologi Informasi"],
+    "categories": ["IT Support & Infrastructure"],
+    "mode": "Tim",
+    "location": {
+      "city": "Surabaya",
+      "province": "Jawa Timur",
+      "address": "Jalan Ujung, Ujung, Kecamatan Semampir, Surabaya"
+    },
+    "contact": {
+      "phone": "81217027640"
+    },
+    "batch": "Angkatan 2023 Semester Genap",
+    "description": "Praktik kerja magang tim mahasiswa di Divisi Teknologi Informasi PT PAL Indonesia Surabaya.",
+    "requirements": [
+      "Mahasiswa Manajemen Informatika (terbuka untuk Tim / Mandiri)",
+      "Memahami dasar jaringan (LAN/WAN), sistem operasi, atau hardware",
+      "Mematuhi standar disiplin dan regulasi keamanan industri pertahanan strategis",
+      "Berintegritas tinggi dan bertanggung jawab"
+    ]
+  },
+  {
+    "id": "magang-dprd-surabaya",
+    "type": "magang",
+    "company": "Dewan Perwakilan Rakyat Daerah Kota Surabaya",
+    "slug": "dprd-kota-surabaya-it-support",
+    "roles": ["IT Support"],
+    "divisions": ["IT Support"],
+    "categories": ["IT Support & Infrastructure"],
+    "mode": "Mandiri",
+    "location": {
+      "city": "Surabaya",
+      "province": "Jawa Timur",
+      "address": "Jl. Yos Sudarso No.18 - 22, Embong Kaliasin, Kec. Genteng, Surabaya, Jawa Timur"
+    },
+    "contact": {
+      "phone": "(031) 5463551"
+    },
+    "batch": "Angkatan 2023 Semester Genap",
+    "description": "Praktik kerja magang mandiri IT Support di Sekretariat Dewan Perwakilan Rakyat Daerah Kota Surabaya.",
+    "requirements": [
+      "Memahami hardware komputer, perangkat jaringan, dan periferal perkantoran",
+      "Etika kerja yang baik, berpenampilan rapi dalam lingkungan legislatif",
+      "Kemampuan troubleshooting cepat sarana TI kedinasan"
+    ]
+  }
+]
