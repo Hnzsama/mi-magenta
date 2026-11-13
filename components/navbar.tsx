@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { 
   GraduationCap, 
   Briefcase, 
@@ -31,6 +32,13 @@ import {
 
 export function Navbar() {
   const [open, setOpen] = useState(false);
+  const pathname = usePathname();
+
+  const isHomeActive = pathname === "/";
+  const isProgramActive = pathname === "/stupen" || pathname === "/magang" || pathname.startsWith("/peluang");
+  const isPanduanActive = pathname.startsWith("/panduan");
+  const isStupenActive = pathname === "/stupen";
+  const isMagangActive = pathname === "/magang";
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/80 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 shadow-2xs">
@@ -64,7 +72,14 @@ export function Navbar() {
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-8 text-sm font-medium ml-12 mr-auto">
-          <Link href="/" className="text-foreground/90 hover:text-primary transition-colors py-1 whitespace-nowrap">
+          <Link
+            href="/"
+            className={`py-1 whitespace-nowrap transition-colors ${
+              isHomeActive
+                ? "text-primary font-semibold"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
             Beranda
           </Link>
 
@@ -74,7 +89,11 @@ export function Navbar() {
               render={
                 <button
                   type="button"
-                  className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-primary transition-colors py-1 whitespace-nowrap outline-none cursor-pointer"
+                  className={`inline-flex items-center gap-1.5 py-1 whitespace-nowrap outline-none cursor-pointer transition-colors ${
+                    isProgramActive
+                      ? "text-primary font-semibold"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
                 >
                   <span>Program Peluang</span>
                   <ChevronDown size={14} className="opacity-70 transition-transform duration-200" />
@@ -86,14 +105,18 @@ export function Navbar() {
                 render={
                   <Link
                     href="/stupen"
-                    className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-xs font-medium cursor-pointer hover:bg-muted"
+                    className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-xs font-medium cursor-pointer transition-colors ${
+                      isStupenActive
+                        ? "bg-primary/10 text-primary font-semibold"
+                        : "text-foreground hover:bg-muted"
+                    }`}
                   >
                     <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-[var(--mi-cyan)]/10 text-[var(--mi-blue)]">
                       <GraduationCap size={16} />
                     </div>
                     <div>
-                      <span className="font-semibold block text-foreground">Studi Independen</span>
-                      <span className="text-[10px] text-muted-foreground">Sertifikasi &amp; Project Industri</span>
+                      <span className="block">Studi Independen</span>
+                      <span className="text-[10px] text-muted-foreground font-normal">Sertifikasi &amp; Project Industri</span>
                     </div>
                   </Link>
                 }
@@ -102,14 +125,18 @@ export function Navbar() {
                 render={
                   <Link
                     href="/magang"
-                    className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-xs font-medium cursor-pointer hover:bg-muted"
+                    className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-xs font-medium cursor-pointer transition-colors ${
+                      isMagangActive
+                        ? "bg-primary/10 text-primary font-semibold"
+                        : "text-foreground hover:bg-muted"
+                    }`}
                   >
                     <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-[var(--mi-orange)]/10 text-[var(--mi-orange)]">
                       <Briefcase size={16} />
                     </div>
                     <div>
-                      <span className="font-semibold block text-foreground">Magang Industri</span>
-                      <span className="text-[10px] text-muted-foreground">Kerja Praktik Mandiri / Tim</span>
+                      <span className="block">Magang Industri</span>
+                      <span className="text-[10px] text-muted-foreground font-normal">Kerja Praktik Mandiri / Tim</span>
                     </div>
                   </Link>
                 }
@@ -117,7 +144,14 @@ export function Navbar() {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <Link href="/panduan" className="text-muted-foreground hover:text-primary transition-colors py-1 whitespace-nowrap">
+          <Link
+            href="/panduan"
+            className={`py-1 whitespace-nowrap transition-colors ${
+              isPanduanActive
+                ? "text-primary font-semibold"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
             Panduan Dosen &amp; Mahasiswa
           </Link>
         </nav>
@@ -167,7 +201,11 @@ export function Navbar() {
                   <Link
                     href="/"
                     onClick={() => setOpen(false)}
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-foreground/80 hover:text-primary hover:bg-primary/5 transition-colors"
+                    className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                      isHomeActive
+                        ? "bg-primary/10 text-primary font-semibold"
+                        : "text-foreground/80 hover:text-primary hover:bg-primary/5"
+                    }`}
                   >
                     <House size={18} className="text-primary/70 shrink-0" />
                     <span>Beranda</span>
@@ -181,7 +219,11 @@ export function Navbar() {
                       <Link
                         href="/stupen"
                         onClick={() => setOpen(false)}
-                        className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-xs font-medium text-foreground/85 hover:text-primary hover:bg-primary/5 transition-colors"
+                        className={`flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-xs font-medium transition-colors ${
+                          isStupenActive
+                            ? "bg-primary/10 text-primary font-semibold"
+                            : "text-foreground/85 hover:text-primary hover:bg-primary/5"
+                        }`}
                       >
                         <GraduationCap size={16} className="text-[var(--mi-cyan)]" />
                         <span>Studi Independen (Stupen)</span>
@@ -189,7 +231,11 @@ export function Navbar() {
                       <Link
                         href="/magang"
                         onClick={() => setOpen(false)}
-                        className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-xs font-medium text-foreground/85 hover:text-primary hover:bg-primary/5 transition-colors"
+                        className={`flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-xs font-medium transition-colors ${
+                          isMagangActive
+                            ? "bg-primary/10 text-primary font-semibold"
+                            : "text-foreground/85 hover:text-primary hover:bg-primary/5"
+                        }`}
                       >
                         <Briefcase size={16} className="text-[var(--mi-orange)]" />
                         <span>Magang Industri</span>
@@ -200,7 +246,11 @@ export function Navbar() {
                   <Link
                     href="/panduan"
                     onClick={() => setOpen(false)}
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-foreground/80 hover:text-primary hover:bg-primary/5 transition-colors"
+                    className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                      isPanduanActive
+                        ? "bg-primary/10 text-primary font-semibold"
+                        : "text-foreground/80 hover:text-primary hover:bg-primary/5"
+                    }`}
                   >
                     <BookOpen size={18} className="text-primary/70 shrink-0" />
                     <span>Panduan Dosen &amp; Mahasiswa</span>
