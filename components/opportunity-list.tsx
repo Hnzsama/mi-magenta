@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Opportunity } from "@/lib/opportunities";
 import { OpportunityCard } from "./opportunity-card";
 import { Input } from "@/components/ui/input";
@@ -23,6 +23,7 @@ interface OpportunityListProps {
 }
 
 export function OpportunityList({ initialItems, defaultType = "all" }: OpportunityListProps) {
+  const [items, setItems] = useState<Opportunity[]>(initialItems);
   const [search, setSearch] = useState("");
   const [selectedType, setSelectedType] = useState<"all" | "stupen" | "magang">(defaultType);
   const [selectedMode, setSelectedMode] = useState<"all" | "Mandiri" | "Tim">("all");
@@ -31,32 +32,69 @@ export function OpportunityList({ initialItems, defaultType = "all" }: Opportuni
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [activeFilterTab, setActiveFilterTab] = useState<"divisions" | "roles" | "categories">("divisions");
 
+  // Load custom/imported opportunities from admin session
+  useEffect(() => {
+    try {
+      const customRaw = localStorage.getItem("mi_admin_custom_opportunities");
+      if (customRaw) {
+        const customParsed = JSON.parse(customRaw);
+        if (Array.isArray(customParsed) && customParsed.length > 0) {
+          const mapped: Opportunity[] = customParsed.map((c: any) => ({
+            id: c.id || `custom-${Date.now()}-${Math.random()}`,
+            type: c.type === "stupen" ? "stupen" : "magang",
+            company: c.company || "Perusahaan Rekanan",
+            slug: c.slug || `${(c.company || "mitra").toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${(c.role || "posisi").toLowerCase().replace(/[^a-z0-9]+/g, "-")}`,
+            roles: Array.isArray(c.roles) ? c.roles : [c.role || "Staff Magang"],
+            divisions: Array.isArray(c.divisions) ? c.divisions : [c.division || "Umum"],
+            categories: Array.isArray(c.categories) && c.categories.length > 0 ? c.categories : ["Teknologi Informasi"],
+            mode: c.mode === "Tim" ? "Tim" : "Mandiri",
+            location: {
+              city: c.city || "Surabaya",
+              province: c.province || "Jawa Timur",
+              address: c.address || c.city || "Alamat belum diatur",
+            },
+            contact: {
+              phone: c.phone || "08123456789",
+            },
+            batch: c.batch || "Angkatan 2023 Semester Genap",
+            description: c.description || `Praktik magang dan studi terpadu di ${c.company}.`,
+          }));
+          setItems([...mapped, ...initialItems]);
+          return;
+        }
+      }
+    } catch {
+      // ignore
+    }
+    setItems(initialItems);
+  }, [initialItems]);
+
   // Aggregate all unique divisions
   const allDivisions = useMemo(() => {
     const set = new Set<string>();
-    initialItems.forEach((item) => {
+    items.forEach((item) => {
       item.divisions.forEach((div) => set.add(div));
     });
     return Array.from(set).sort();
-  }, [initialItems]);
+  }, [items]);
 
   // Aggregate all unique roles
   const allRoles = useMemo(() => {
     const set = new Set<string>();
-    initialItems.forEach((item) => {
+    items.forEach((item) => {
       item.roles.forEach((r) => set.add(r));
     });
     return Array.from(set).sort();
-  }, [initialItems]);
+  }, [items]);
 
   // Aggregate all unique categories
   const allCategories = useMemo(() => {
     const set = new Set<string>();
-    initialItems.forEach((item) => {
+    items.forEach((item) => {
       item.categories.forEach((cat) => set.add(cat));
     });
     return Array.from(set).sort();
-  }, [initialItems]);
+  }, [items]);
 
   // Toggle handlers for multi-select arrays
   const toggleDivision = (division: string) => {
@@ -79,7 +117,7 @@ export function OpportunityList({ initialItems, defaultType = "all" }: Opportuni
 
   // Filter logic: matches any selected division/role/category if filter array is not empty
   const filteredItems = useMemo(() => {
-    return initialItems.filter((item) => {
+    return items.filter((item) => {
       // Type filter
       if (selectedType !== "all" && item.type !== selectedType) {
         return false;
@@ -120,7 +158,7 @@ export function OpportunityList({ initialItems, defaultType = "all" }: Opportuni
       return true;
     });
   }, [
-    initialItems,
+    items,
     selectedType,
     selectedMode,
     selectedDivisions,
