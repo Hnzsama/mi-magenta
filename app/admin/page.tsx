@@ -745,95 +745,109 @@ export default function AdminPage() {
 
             {/* SHADCN TABS */}
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full space-y-6">
-              <TabsList className="w-full sm:w-auto h-auto p-1.5 flex flex-wrap gap-1 bg-muted/40 border rounded-xl">
-                <TabsTrigger value="catalog" className="gap-2 py-2 px-3 text-xs font-semibold rounded-lg">
-                  <TableIcon size={16} className="text-[var(--mi-blue)]" />
-                  <span>Katalog &amp; Kelola Data</span>
-                  <Badge variant="secondary" className="text-[10px] py-0 px-1.5 font-normal">
-                    {combinedCatalog.length}
-                  </Badge>
-                </TabsTrigger>
+              <div className="w-full overflow-x-auto pb-1">
+                <TabsList className="inline-flex w-max sm:w-auto h-auto p-1 bg-muted/40 border rounded-xl gap-1 shrink-0">
+                  <TabsTrigger value="catalog" className="shrink-0 gap-2 py-2 px-3.5 text-xs font-semibold rounded-lg whitespace-nowrap">
+                    <TableIcon size={16} className="text-[var(--mi-blue)]" />
+                    <span>Katalog &amp; Kelola Data</span>
+                    <Badge variant="secondary" className="text-[10px] py-0 px-1.5 font-normal">
+                      {combinedCatalog.length}
+                    </Badge>
+                  </TabsTrigger>
 
-                <TabsTrigger value="import" className="gap-2 py-2 px-3 text-xs font-semibold rounded-lg">
-                  <FileSpreadsheet size={16} className="text-emerald-600 dark:text-emerald-400" />
-                  <span>Import Excel / CSV</span>
-                  <Badge variant="outline" className="text-[9px] py-0 px-1 border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold">
-                    Baru
-                  </Badge>
-                </TabsTrigger>
+                  <TabsTrigger value="import" className="shrink-0 gap-2 py-2 px-3.5 text-xs font-semibold rounded-lg whitespace-nowrap">
+                    <FileSpreadsheet size={16} className="text-emerald-600 dark:text-emerald-400" />
+                    <span>Import Excel / CSV</span>
+                    <Badge variant="outline" className="text-[9px] py-0 px-1 border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold">
+                      Baru
+                    </Badge>
+                  </TabsTrigger>
 
-                <TabsTrigger value="manual" className="gap-2 py-2 px-3 text-xs font-semibold rounded-lg">
-                  <PlusCircle size={16} className="text-primary" />
-                  <span>Input Manual</span>
-                </TabsTrigger>
+                  <TabsTrigger value="manual" className="shrink-0 gap-2 py-2 px-3.5 text-xs font-semibold rounded-lg whitespace-nowrap">
+                    <PlusCircle size={16} className="text-primary" />
+                    <span>Input Manual</span>
+                  </TabsTrigger>
 
-                <TabsTrigger value="export" className="gap-2 py-2 px-3 text-xs font-semibold rounded-lg">
-                  <Download size={16} className="text-muted-foreground" />
-                  <span>Ekspor Data</span>
-                </TabsTrigger>
-              </TabsList>
+                  <TabsTrigger value="export" className="shrink-0 gap-2 py-2 px-3.5 text-xs font-semibold rounded-lg whitespace-nowrap">
+                    <Download size={16} className="text-muted-foreground" />
+                    <span>Ekspor Data</span>
+                  </TabsTrigger>
+                </TabsList>
+              </div>
 
               {/* TAB 1: KATALOG & KELOLA DATA (DENGAN AKSI LENGKAP & PAGINASI) */}
               <TabsContent value="catalog" className="space-y-6">
                 <Card>
-                  <CardHeader>
+                  <CardHeader className="pb-4 border-b">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                       <div>
                         <CardTitle className="text-lg flex items-center gap-2">
                           <TableIcon size={20} className="text-primary" /> Katalog Seluruh Lowongan Aktif
                         </CardTitle>
                         <CardDescription className="text-xs sm:text-sm mt-0.5">
-                          Total {combinedCatalog.length} lowongan. Anda memiliki kendali penuh untuk <strong>mengubah (edit)</strong>, <strong>menghapus</strong>, atau <strong>meninjau</strong> semua data.
+                          Total {combinedCatalog.length} lowongan terdata. Anda memiliki kendali penuh untuk <strong>mengubah (edit)</strong>, <strong>menghapus</strong>, atau <strong>meninjau</strong> semua data.
                         </CardDescription>
                       </div>
 
-                      <div className="flex flex-wrap items-center gap-2">
-                        {deletedIds.length > 0 && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={handleRestoreDeleted}
-                            className="h-9 text-xs gap-1.5 border-amber-500/30 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10"
-                            title="Pulihkan data bawaan yang sebelumnya dihapus"
+                      {deletedIds.length > 0 && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={handleRestoreDeleted}
+                          className="h-9 text-xs gap-1.5 border-amber-500/30 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 shrink-0 rounded-lg self-start sm:self-center"
+                          title="Pulihkan data bawaan yang sebelumnya dihapus"
+                        >
+                          <RotateCcw size={14} /> Pulihkan ({deletedIds.length}) Data Bawaan
+                        </Button>
+                      )}
+                    </div>
+                  </CardHeader>
+
+                  <CardContent className="space-y-4 pt-5">
+                    {/* Clean Search & Filter Toolbar */}
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                      <div className="relative flex-1">
+                        <MagnifyingGlass size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+                        <Input
+                          placeholder="Cari nama perusahaan, posisi / role, divisi, atau kota..."
+                          value={catalogSearch}
+                          onChange={(e) => setCatalogSearch(e.target.value)}
+                          className="pl-10 pr-9 h-10 text-xs sm:text-sm rounded-lg"
+                        />
+                        {catalogSearch && (
+                          <button
+                            type="button"
+                            onClick={() => setCatalogSearch("")}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground hover:text-foreground font-bold p-1"
+                            title="Reset pencarian"
                           >
-                            <RotateCcw size={14} /> Pulihkan ({deletedIds.length}) Data Bawaan
-                          </Button>
+                            ✕
+                          </button>
                         )}
+                      </div>
 
-                        <div className="relative w-48 sm:w-60">
-                          <MagnifyingGlass size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                          <Input
-                            placeholder="Cari perusahaan/role/kota..."
-                            value={catalogSearch}
-                            onChange={(e) => setCatalogSearch(e.target.value)}
-                            className="pl-8 h-9 text-xs"
-                          />
-                        </div>
-
+                      <div className="w-full sm:w-52 shrink-0">
                         <Select
                           value={catalogTypeFilter}
                           onValueChange={(val) => setCatalogTypeFilter(val as any)}
                         >
-                          <SelectTrigger className="h-9 min-w-36 text-xs">
+                          <SelectTrigger className="h-10 w-full text-xs sm:text-sm rounded-lg font-medium">
                             <SelectValue>
                               {catalogTypeFilter === "all"
-                                ? "Semua Tipe"
+                                ? "Semua Jenis Program"
                                 : catalogTypeFilter === "magang"
                                 ? "Magang Industri"
                                 : "Studi Independen"}
                             </SelectValue>
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="all">Semua Tipe</SelectItem>
+                            <SelectItem value="all">Semua Jenis Program</SelectItem>
                             <SelectItem value="magang">Magang Industri</SelectItem>
                             <SelectItem value="stupen">Studi Independen</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
                     </div>
-                  </CardHeader>
-
-                  <CardContent className="space-y-4">
                     <div className="rounded-xl border bg-card overflow-hidden">
                       <Table>
                         <TableHeader>
