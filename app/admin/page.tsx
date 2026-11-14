@@ -28,6 +28,7 @@ import {
   ChevronLeft,
   ChevronRight,
   RotateCcw,
+  MoreHorizontal,
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -52,6 +53,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Dialog,
   DialogContent,
@@ -806,8 +814,14 @@ export default function AdminPage() {
                           value={catalogTypeFilter}
                           onValueChange={(val) => setCatalogTypeFilter(val as any)}
                         >
-                          <SelectTrigger className="h-9 min-w-32 text-xs">
-                            <SelectValue placeholder="Semua Tipe" />
+                          <SelectTrigger className="h-9 min-w-36 text-xs">
+                            <SelectValue>
+                              {catalogTypeFilter === "all"
+                                ? "Semua Tipe"
+                                : catalogTypeFilter === "magang"
+                                ? "Magang Industri"
+                                : "Studi Independen"}
+                            </SelectValue>
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="all">Semua Tipe</SelectItem>
@@ -831,7 +845,7 @@ export default function AdminPage() {
                             <TableHead className="font-bold">Jenis</TableHead>
                             <TableHead className="font-bold">Mode</TableHead>
                             <TableHead className="font-bold">Kota</TableHead>
-                            <TableHead className="text-center font-bold">Aksi Pengelola</TableHead>
+                            <TableHead className="w-16 text-center font-bold">Aksi</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -875,42 +889,49 @@ export default function AdminPage() {
                                 <TableCell className="text-muted-foreground text-xs">{item.mode}</TableCell>
                                 <TableCell className="text-muted-foreground text-xs">{item.city}</TableCell>
                                 <TableCell className="text-center">
-                                  <div className="flex items-center justify-center gap-1">
-                                    {/* Action 1: Edit Modal */}
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-lg"
-                                      onClick={() => handleOpenEdit(item)}
-                                      title="Ubah / Edit Lowongan Ini"
-                                    >
-                                      <Pencil size={15} />
-                                    </Button>
-
-                                    {/* Action 2: Delete Item */}
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg"
-                                      onClick={() => handleDeleteItem(item.id, item.isCustom)}
-                                      title="Hapus Lowongan Ini"
-                                    >
-                                      <Trash2 size={15} />
-                                    </Button>
-
-                                    {/* Action 3: View Details */}
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg"
-                                      nativeButton={false}
+                                  <DropdownMenu>
+                                    <DropdownMenuTrigger
                                       render={
-                                        <Link href={`/peluang/${item.slug}`} target="_blank" title="Lihat di Portal Mahasiswa">
-                                          <ExternalLink size={15} />
-                                        </Link>
+                                        <Button
+                                          variant="ghost"
+                                          size="icon"
+                                          className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg"
+                                          aria-label="Menu Aksi"
+                                        >
+                                          <MoreHorizontal size={16} />
+                                        </Button>
                                       }
                                     />
-                                  </div>
+                                    <DropdownMenuContent align="end" className="w-44 p-1 rounded-xl shadow-lg border">
+                                      <DropdownMenuItem
+                                        className="flex items-center gap-2 px-2.5 py-2 text-xs rounded-lg cursor-pointer hover:bg-muted"
+                                        onClick={() => handleOpenEdit(item)}
+                                      >
+                                        <Pencil size={14} className="text-primary" />
+                                        <span>Ubah Data</span>
+                                      </DropdownMenuItem>
+
+                                      <DropdownMenuItem
+                                        className="flex items-center gap-2 px-2.5 py-2 text-xs rounded-lg cursor-pointer hover:bg-muted"
+                                        render={
+                                          <Link href={`/peluang/${item.slug}`} target="_blank" className="flex items-center gap-2 w-full">
+                                            <ExternalLink size={14} className="text-muted-foreground" />
+                                            <span>Lihat di Portal</span>
+                                          </Link>
+                                        }
+                                      />
+
+                                      <DropdownMenuSeparator className="my-1" />
+
+                                      <DropdownMenuItem
+                                        className="flex items-center gap-2 px-2.5 py-2 text-xs rounded-lg cursor-pointer text-destructive focus:text-destructive hover:bg-destructive/10"
+                                        onClick={() => handleDeleteItem(item.id, item.isCustom)}
+                                      >
+                                        <Trash2 size={14} />
+                                        <span>Hapus Lowongan</span>
+                                      </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                  </DropdownMenu>
                                 </TableCell>
                               </TableRow>
                             ))
