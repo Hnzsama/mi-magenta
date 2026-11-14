@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import Link from "next/link";
 import * as XLSX from "xlsx";
 import {
@@ -9,15 +9,26 @@ import {
   CheckCircle,
   PlusCircle,
   SignOut,
-  Trash,
-  ArrowSquareOut,
   DownloadSimple,
   FileArrowDown,
   MagnifyingGlass,
   Check,
   Table as TableIcon,
 } from "@phosphor-icons/react";
-import { FileSpreadsheet, Download, FileUp, RefreshCw, AlertCircle, Eye } from "lucide-react";
+import {
+  FileSpreadsheet,
+  Download,
+  FileUp,
+  RefreshCw,
+  AlertCircle,
+  Eye,
+  Pencil,
+  Trash2,
+  ExternalLink,
+  ChevronLeft,
+  ChevronRight,
+  RotateCcw,
+} from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -41,6 +52,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import opportunitiesData from "@/data/opportunities.json";
 
 interface AdminSession {
@@ -58,6 +77,7 @@ export interface CustomOpportunity {
   city: string;
   phone: string;
   description?: string;
+  slug?: string;
   createdAt: string;
 }
 
@@ -81,7 +101,7 @@ export default function AdminPage() {
   const [sessionData, setSessionData] = useState<AdminSession | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
-  const [activeTab, setActiveTab] = useState<string>("import");
+  const [activeTab, setActiveTab] = useState<string>("catalog");
 
   // Manual Form states
   const [company, setCompany] = useState("");
@@ -96,6 +116,14 @@ export default function AdminPage() {
 
   // Custom opportunities state
   const [customList, setCustomList] = useState<CustomOpportunity[]>([]);
+  // Deleted default IDs (saved to localStorage)
+  const [deletedIds, setDeletedIds] = useState<string[]>([]);
+  // Overrides for edited items (saved to localStorage)
+  const [overrides, setOverrides] = useState<Record<string, Partial<CustomOpportunity>>>({});
+
+  // Edit Dialog Modal state
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editingItem, setEditingItem] = useState<CustomOpportunity | null>(null);
 
   // Import states
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -105,9 +133,11 @@ export default function AdminPage() {
   const [importSuccessMsg, setImportSuccessMsg] = useState("");
   const [isProcessingFile, setIsProcessingFile] = useState(false);
 
-  // Catalog search & filter in admin
+  // Catalog search, filter & pagination in admin
   const [catalogSearch, setCatalogSearch] = useState("");
   const [catalogTypeFilter, setCatalogTypeFilter] = useState<"all" | "magang" | "stupen">("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(5);
 
   // Restore session & data on mount
   useEffect(() => {
@@ -125,12 +155,27 @@ export default function AdminPage() {
       if (savedData) {
         setCustomList(JSON.parse(savedData));
       }
+
+      const savedDeleted = localStorage.getItem("mi_admin_deleted_ids");
+      if (savedDeleted) {
+        setDeletedIds(JSON.parse(savedDeleted));
+      }
+
+      const savedOverrides = localStorage.getItem("mi_admin_overrides");
+      if (savedOverrides) {
+        setOverrides(JSON.parse(savedOverrides));
+      }
     } catch {
       localStorage.removeItem("mi_admin_session");
     } finally {
       setIsLoading(false);
     }
   }, []);
+
+  // Reset to page 1 on filter or search change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [catalogSearch, catalogTypeFilter, pageSize]);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -162,16 +207,21 @@ export default function AdminPage() {
 
   const handleAddManual = (e: React.FormEvent) => {
     e.preventDefault();
+    const cleanCompany = company.trim();
+    const cleanRole = role.trim();
+    const slug = `${cleanCompany.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${cleanRole.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
+
     const newEntry: CustomOpportunity = {
       id: `manual-${Date.now()}`,
-      company: company.trim(),
-      role: role.trim(),
+      company: cleanCompany,
+      role: cleanRole,
       division: division.trim(),
       type,
       mode,
       city: city.trim(),
       phone: phone.trim(),
-      description: description.trim() || `Program kerja magang dan studi independen di ${company}.`,
+      description: description.trim() || `Program kerja magang dan studi independen di ${cleanCompany}.`,
+      slug,
       createdAt: new Date().toLocaleDateString("id-ID"),
     };
 
@@ -192,10 +242,77 @@ export default function AdminPage() {
     }, 4000);
   };
 
-  const handleDeleteCustom = (id: string) => {
-    const updated = customList.filter((item) => item.id !== id);
-    setCustomList(updated);
-    localStorage.setItem("mi_admin_custom_opportunities", JSON.stringify(updated));
+  // Open Edit Dialog for ANY item
+  const handleOpenEdit = (item: any) => {
+    setEditingItem({
+      id: item.id,
+      company: item.company,
+      role: item.role,
+      division: item.division,
+      type: item.type,
+      mode: item.mode,
+      city: item.city,
+      phone: item.phone,
+      description: item.description || "",
+      slug: item.slug,
+      createdAt: item.createdAt || "Katalog Sistem",
+    });
+    setIsEditDialogOpen(true);
+  };
+
+  // Save changes from Edit Dialog
+  const handleSaveEdit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingItem) return;
+
+    // If it's a custom item, update customList
+    const isCustom = customList.some((c) => c.id === editingItem.id);
+    if (isCustom) {
+      const updated = customList.map((c) => (c.id === editingItem.id ? editingItem : c));
+      setCustomList(updated);
+      localStorage.setItem("mi_admin_custom_opportunities", JSON.stringify(updated));
+    } else {
+      // If it's a system default item, store override in localStorage
+      const updatedOverrides = {
+        ...overrides,
+        [editingItem.id]: {
+          company: editingItem.company,
+          role: editingItem.role,
+          division: editingItem.division,
+          type: editingItem.type,
+          mode: editingItem.mode,
+          city: editingItem.city,
+          phone: editingItem.phone,
+          description: editingItem.description,
+        },
+      };
+      setOverrides(updatedOverrides);
+      localStorage.setItem("mi_admin_overrides", JSON.stringify(updatedOverrides));
+    }
+
+    setIsEditDialogOpen(false);
+    setEditingItem(null);
+  };
+
+  // Delete / Remove ANY item (both custom and default)
+  const handleDeleteItem = (id: string, isCustom: boolean) => {
+    if (!confirm("Apakah Anda yakin ingin menghapus lowongan ini dari sistem?")) return;
+
+    if (isCustom) {
+      const updated = customList.filter((item) => item.id !== id);
+      setCustomList(updated);
+      localStorage.setItem("mi_admin_custom_opportunities", JSON.stringify(updated));
+    } else {
+      const updatedDeleted = Array.from(new Set([...deletedIds, id]));
+      setDeletedIds(updatedDeleted);
+      localStorage.setItem("mi_admin_deleted_ids", JSON.stringify(updatedDeleted));
+    }
+  };
+
+  // Restore deleted default items
+  const handleRestoreDeleted = () => {
+    setDeletedIds([]);
+    localStorage.removeItem("mi_admin_deleted_ids");
   };
 
   // Helper to map loose column names
@@ -286,18 +403,22 @@ export default function AdminPage() {
       return;
     }
 
-    const newEntries: CustomOpportunity[] = validRows.map((r, idx) => ({
-      id: `imported-${Date.now()}-${idx}`,
-      company: r.company,
-      role: r.role,
-      division: r.division,
-      type: r.type,
-      mode: r.mode,
-      city: r.city,
-      phone: r.phone,
-      description: r.description,
-      createdAt: new Date().toLocaleDateString("id-ID"),
-    }));
+    const newEntries: CustomOpportunity[] = validRows.map((r, idx) => {
+      const slug = `${r.company.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${r.role.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
+      return {
+        id: `imported-${Date.now()}-${idx}`,
+        company: r.company,
+        role: r.role,
+        division: r.division,
+        type: r.type,
+        mode: r.mode,
+        city: r.city,
+        phone: r.phone,
+        description: r.description,
+        slug,
+        createdAt: new Date().toLocaleDateString("id-ID"),
+      };
+    });
 
     const updated = [...newEntries, ...customList];
     setCustomList(updated);
@@ -309,6 +430,7 @@ export default function AdminPage() {
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
+    setActiveTab("catalog");
   };
 
   const downloadSampleTemplate = (format: "xlsx" | "csv") => {
@@ -357,34 +479,19 @@ export default function AdminPage() {
   };
 
   const exportAllData = (format: "xlsx" | "csv" | "json") => {
-    const allItems = [
-      ...customList.map((c) => ({
-        ID: c.id,
-        Sumber: "Ditambahkan Admin",
-        Perusahaan: c.company,
-        Posisi: c.role,
-        Divisi: c.division,
-        Jenis: c.type === "stupen" ? "Studi Independen" : "Magang Industri",
-        Mode: c.mode,
-        Kota: c.city,
-        Telepon: c.phone,
-        Deskripsi: c.description || "",
-        Tanggal: c.createdAt,
-      })),
-      ...opportunitiesData.map((d: any) => ({
-        ID: d.id,
-        Sumber: "Katalog Bawaan",
-        Perusahaan: d.company,
-        Posisi: d.roles.join(", "),
-        Divisi: d.divisions.join(", "),
-        Jenis: d.type === "stupen" ? "Studi Independen" : "Magang Industri",
-        Mode: d.mode,
-        Kota: d.location.city,
-        Telepon: d.contact.phone,
-        Deskripsi: d.description,
-        Tanggal: d.batch,
-      })),
-    ];
+    const allItems = combinedCatalog.map((c) => ({
+      ID: c.id,
+      Sumber: c.isCustom ? "Data Admin" : "Katalog Bawaan",
+      Perusahaan: c.company,
+      Posisi: c.role,
+      Divisi: c.division,
+      Jenis: c.type === "stupen" ? "Studi Independen" : "Magang Industri",
+      Mode: c.mode,
+      Kota: c.city,
+      Telepon: c.phone,
+      Deskripsi: c.description || "",
+      Slug: c.slug,
+    }));
 
     if (format === "json") {
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(allItems, null, 2));
@@ -408,9 +515,28 @@ export default function AdminPage() {
     }
   };
 
-  // Combine opportunities for admin catalog preview
-  const combinedCatalog = [
-    ...customList.map((c) => ({
+  // Combine opportunities for admin catalog preview (applying deletedIds & overrides)
+  const combinedCatalog = useMemo(() => {
+    const defaults = opportunitiesData
+      .filter((d: any) => !deletedIds.includes(d.id))
+      .map((d: any) => {
+        const override = overrides[d.id] || {};
+        return {
+          id: d.id,
+          company: override.company || d.company,
+          role: override.role || d.roles[0] || "Staff",
+          division: override.division || d.divisions[0] || "Umum",
+          type: (override.type || d.type) as "magang" | "stupen",
+          mode: (override.mode || d.mode) as "Mandiri" | "Tim",
+          city: override.city || d.location.city,
+          phone: override.phone || d.contact.phone,
+          description: override.description || d.description,
+          slug: d.slug,
+          isCustom: false,
+        };
+      });
+
+    const customs = customList.map((c) => ({
       id: c.id,
       company: c.company,
       role: c.role,
@@ -419,34 +545,38 @@ export default function AdminPage() {
       mode: c.mode,
       city: c.city,
       phone: c.phone,
+      description: c.description || "",
+      slug: c.slug || `${c.company.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${c.role.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`,
       isCustom: true,
-    })),
-    ...opportunitiesData.map((d: any) => ({
-      id: d.id,
-      company: d.company,
-      role: d.roles[0] || "Staff",
-      division: d.divisions[0] || "Umum",
-      type: d.type as "magang" | "stupen",
-      mode: d.mode as "Mandiri" | "Tim",
-      city: d.location.city,
-      phone: d.contact.phone,
-      isCustom: false,
-    })),
-  ];
+    }));
 
-  const filteredCatalog = combinedCatalog.filter((item) => {
-    if (catalogTypeFilter !== "all" && item.type !== catalogTypeFilter) return false;
-    if (catalogSearch.trim()) {
-      const q = catalogSearch.toLowerCase();
-      return (
-        item.company.toLowerCase().includes(q) ||
-        item.role.toLowerCase().includes(q) ||
-        item.division.toLowerCase().includes(q) ||
-        item.city.toLowerCase().includes(q)
-      );
-    }
-    return true;
-  });
+    return [...customs, ...defaults];
+  }, [customList, deletedIds, overrides]);
+
+  const filteredCatalog = useMemo(() => {
+    return combinedCatalog.filter((item) => {
+      if (catalogTypeFilter !== "all" && item.type !== catalogTypeFilter) return false;
+      if (catalogSearch.trim()) {
+        const q = catalogSearch.toLowerCase();
+        return (
+          item.company.toLowerCase().includes(q) ||
+          item.role.toLowerCase().includes(q) ||
+          item.division.toLowerCase().includes(q) ||
+          item.city.toLowerCase().includes(q)
+        );
+      }
+      return true;
+    });
+  }, [combinedCatalog, catalogTypeFilter, catalogSearch]);
+
+  // Pagination calculation
+  const totalItems = filteredCatalog.length;
+  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = Math.min(startIndex + pageSize, totalItems);
+  const paginatedCatalog = useMemo(() => {
+    return filteredCatalog.slice(startIndex, endIndex);
+  }, [filteredCatalog, startIndex, endIndex]);
 
   if (isLoading) {
     return (
@@ -530,7 +660,7 @@ export default function AdminPage() {
         ) : (
           /* LOGGED IN DASHBOARD - SHADCN UI */
           <div className="space-y-6">
-            {/* Top Navigation & Session Bar using Shadcn Card */}
+            {/* Top Navigation & Session Bar */}
             <Card className="p-4 sm:p-5 shadow-sm">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-3.5">
@@ -561,7 +691,7 @@ export default function AdminPage() {
                     nativeButton={false}
                     render={
                       <Link href="/" target="_blank">
-                        <Eye size={15} /> Lihat Portal Mahasiswa <ArrowSquareOut size={13} className="opacity-70" />
+                        <Eye size={15} /> Lihat Portal Mahasiswa <ExternalLink size={13} className="opacity-70" />
                       </Link>
                     }
                   />
@@ -577,7 +707,7 @@ export default function AdminPage() {
               </div>
             </Card>
 
-            {/* Quick Stat Cards using Shadcn Card */}
+            {/* Quick Stat Cards */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
               <Card className="p-4 shadow-2xs space-y-1">
                 <span className="text-xs text-muted-foreground font-medium">Total Lowongan Aktif</span>
@@ -608,19 +738,19 @@ export default function AdminPage() {
             {/* SHADCN TABS */}
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full space-y-6">
               <TabsList className="w-full sm:w-auto h-auto p-1.5 flex flex-wrap gap-1 bg-muted/40 border rounded-xl">
-                <TabsTrigger value="import" className="gap-2 py-2 px-3 text-xs font-semibold rounded-lg">
-                  <FileSpreadsheet size={16} className="text-emerald-600 dark:text-emerald-400" />
-                  <span>Import Excel / CSV</span>
-                  <Badge variant="outline" className="text-[9px] py-0 px-1 border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold">
-                    Baru
-                  </Badge>
-                </TabsTrigger>
-
                 <TabsTrigger value="catalog" className="gap-2 py-2 px-3 text-xs font-semibold rounded-lg">
                   <TableIcon size={16} className="text-[var(--mi-blue)]" />
                   <span>Katalog &amp; Kelola Data</span>
                   <Badge variant="secondary" className="text-[10px] py-0 px-1.5 font-normal">
                     {combinedCatalog.length}
+                  </Badge>
+                </TabsTrigger>
+
+                <TabsTrigger value="import" className="gap-2 py-2 px-3 text-xs font-semibold rounded-lg">
+                  <FileSpreadsheet size={16} className="text-emerald-600 dark:text-emerald-400" />
+                  <span>Import Excel / CSV</span>
+                  <Badge variant="outline" className="text-[9px] py-0 px-1 border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold">
+                    Baru
                   </Badge>
                 </TabsTrigger>
 
@@ -635,7 +765,232 @@ export default function AdminPage() {
                 </TabsTrigger>
               </TabsList>
 
-              {/* TAB 1: IMPORT EXCEL / CSV */}
+              {/* TAB 1: KATALOG & KELOLA DATA (DENGAN AKSI LENGKAP & PAGINASI) */}
+              <TabsContent value="catalog" className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                      <div>
+                        <CardTitle className="text-lg flex items-center gap-2">
+                          <TableIcon size={20} className="text-primary" /> Katalog Seluruh Lowongan Aktif
+                        </CardTitle>
+                        <CardDescription className="text-xs sm:text-sm mt-0.5">
+                          Total {combinedCatalog.length} lowongan. Anda memiliki kendali penuh untuk <strong>mengubah (edit)</strong>, <strong>menghapus</strong>, atau <strong>meninjau</strong> semua data.
+                        </CardDescription>
+                      </div>
+
+                      <div className="flex flex-wrap items-center gap-2">
+                        {deletedIds.length > 0 && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={handleRestoreDeleted}
+                            className="h-9 text-xs gap-1.5 border-amber-500/30 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10"
+                            title="Pulihkan data bawaan yang sebelumnya dihapus"
+                          >
+                            <RotateCcw size={14} /> Pulihkan ({deletedIds.length}) Data Bawaan
+                          </Button>
+                        )}
+
+                        <div className="relative w-48 sm:w-60">
+                          <MagnifyingGlass size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                          <Input
+                            placeholder="Cari perusahaan/role/kota..."
+                            value={catalogSearch}
+                            onChange={(e) => setCatalogSearch(e.target.value)}
+                            className="pl-8 h-9 text-xs"
+                          />
+                        </div>
+
+                        <Select
+                          value={catalogTypeFilter}
+                          onValueChange={(val) => setCatalogTypeFilter(val as any)}
+                        >
+                          <SelectTrigger className="h-9 min-w-32 text-xs">
+                            <SelectValue placeholder="Semua Tipe" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">Semua Tipe</SelectItem>
+                            <SelectItem value="magang">Magang Industri</SelectItem>
+                            <SelectItem value="stupen">Studi Independen</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </CardHeader>
+
+                  <CardContent className="space-y-4">
+                    <div className="rounded-xl border bg-card overflow-hidden">
+                      <Table>
+                        <TableHeader>
+                          <TableRow className="bg-muted/50">
+                            <TableHead className="w-12 text-center font-bold">No</TableHead>
+                            <TableHead className="font-bold">Perusahaan &amp; Sumber</TableHead>
+                            <TableHead className="font-bold">Role / Posisi</TableHead>
+                            <TableHead className="font-bold">Divisi</TableHead>
+                            <TableHead className="font-bold">Jenis</TableHead>
+                            <TableHead className="font-bold">Mode</TableHead>
+                            <TableHead className="font-bold">Kota</TableHead>
+                            <TableHead className="text-center font-bold">Aksi Pengelola</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {paginatedCatalog.length > 0 ? (
+                            paginatedCatalog.map((item, idx) => (
+                              <TableRow key={item.id} className="hover:bg-muted/40 transition-colors">
+                                <td className="p-3 text-center text-muted-foreground font-mono text-xs">
+                                  {startIndex + idx + 1}
+                                </td>
+                                <TableCell className="font-semibold text-foreground max-w-[200px]">
+                                  <div className="truncate">{item.company}</div>
+                                  <div className="flex items-center gap-1.5 mt-0.5">
+                                    {item.isCustom ? (
+                                      <Badge variant="outline" className="text-[9px] py-0 px-1 border-primary/30 bg-primary/10 text-primary font-bold">
+                                        Data Admin
+                                      </Badge>
+                                    ) : (
+                                      <span className="text-[10px] text-muted-foreground font-normal">Katalog Bawaan</span>
+                                    )}
+                                    {overrides[item.id] && (
+                                      <Badge variant="outline" className="text-[9px] py-0 px-1 border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400 font-bold">
+                                        Diedit
+                                      </Badge>
+                                    )}
+                                  </div>
+                                </TableCell>
+                                <TableCell className="max-w-[160px] truncate font-medium">{item.role}</TableCell>
+                                <TableCell className="text-muted-foreground max-w-[140px] truncate">{item.division}</TableCell>
+                                <TableCell>
+                                  <Badge
+                                    variant="outline"
+                                    className={`text-[10px] py-0 px-1.5 font-medium ${
+                                      item.type === "stupen"
+                                        ? "text-[var(--mi-cyan)] border-[var(--mi-cyan)]/30 bg-[var(--mi-cyan)]/5"
+                                        : "text-[var(--mi-orange)] border-[var(--mi-orange)]/30 bg-[var(--mi-orange)]/5"
+                                    }`}
+                                  >
+                                    {item.type === "stupen" ? "Stupen" : "Magang"}
+                                  </Badge>
+                                </TableCell>
+                                <TableCell className="text-muted-foreground text-xs">{item.mode}</TableCell>
+                                <TableCell className="text-muted-foreground text-xs">{item.city}</TableCell>
+                                <TableCell className="text-center">
+                                  <div className="flex items-center justify-center gap-1">
+                                    {/* Action 1: Edit Modal */}
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-lg"
+                                      onClick={() => handleOpenEdit(item)}
+                                      title="Ubah / Edit Lowongan Ini"
+                                    >
+                                      <Pencil size={15} />
+                                    </Button>
+
+                                    {/* Action 2: Delete Item */}
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg"
+                                      onClick={() => handleDeleteItem(item.id, item.isCustom)}
+                                      title="Hapus Lowongan Ini"
+                                    >
+                                      <Trash2 size={15} />
+                                    </Button>
+
+                                    {/* Action 3: View Details */}
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg"
+                                      nativeButton={false}
+                                      render={
+                                        <Link href={`/peluang/${item.slug}`} target="_blank" title="Lihat di Portal Mahasiswa">
+                                          <ExternalLink size={15} />
+                                        </Link>
+                                      }
+                                    />
+                                  </div>
+                                </TableCell>
+                              </TableRow>
+                            ))
+                          ) : (
+                            <TableRow>
+                              <TableCell colSpan={8} className="p-8 text-center text-muted-foreground">
+                                Tidak ada lowongan yang sesuai dengan pencarian atau filter.
+                              </TableCell>
+                            </TableRow>
+                          )}
+                        </TableBody>
+                      </Table>
+                    </div>
+
+                    {/* PAGINATION BAR */}
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2 text-xs text-muted-foreground">
+                      <div className="flex items-center gap-2">
+                        <span>Tampilkan:</span>
+                        <Select
+                          value={String(pageSize)}
+                          onValueChange={(val) => setPageSize(Number(val))}
+                        >
+                          <SelectTrigger className="h-8 w-18 text-xs">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="5">5</SelectItem>
+                            <SelectItem value="10">10</SelectItem>
+                            <SelectItem value="20">20</SelectItem>
+                            <SelectItem value="50">50</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <span>
+                          Menampilkan <strong className="text-foreground">{totalItems > 0 ? startIndex + 1 : 0}</strong> -{" "}
+                          <strong className="text-foreground">{endIndex}</strong> dari{" "}
+                          <strong className="text-foreground">{totalItems}</strong> data
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-1 self-center sm:self-auto">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-8 px-2.5 gap-1 text-xs"
+                          onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                          disabled={currentPage === 1}
+                        >
+                          <ChevronLeft size={14} /> Sebelumnya
+                        </Button>
+
+                        <div className="flex items-center gap-1 px-1">
+                          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                            <Button
+                              key={page}
+                              variant={currentPage === page ? "default" : "ghost"}
+                              size="sm"
+                              className="h-8 w-8 p-0 text-xs font-semibold rounded-lg"
+                              onClick={() => setCurrentPage(page)}
+                            >
+                              {page}
+                            </Button>
+                          ))}
+                        </div>
+
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-8 px-2.5 gap-1 text-xs"
+                          onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                          disabled={currentPage === totalPages || totalPages === 0}
+                        >
+                          Berikutnya <ChevronRight size={14} />
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              {/* TAB 2: IMPORT EXCEL / CSV */}
               <TabsContent value="import" className="space-y-6">
                 <Card>
                   <CardHeader>
@@ -833,116 +1188,6 @@ export default function AdminPage() {
                         )}
                       </div>
                     )}
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              {/* TAB 2: KATALOG & KELOLA DATA */}
-              <TabsContent value="catalog" className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                      <div>
-                        <CardTitle className="text-lg flex items-center gap-2">
-                          <TableIcon size={20} className="text-primary" /> Katalog Seluruh Lowongan Aktif
-                        </CardTitle>
-                        <CardDescription className="text-xs sm:text-sm">
-                          Total {combinedCatalog.length} lowongan terdata (gabungan katalog bawaan &amp; data hasil input/import admin).
-                        </CardDescription>
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        <div className="relative w-48 sm:w-64">
-                          <MagnifyingGlass size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                          <Input
-                            placeholder="Cari perusahaan/role..."
-                            value={catalogSearch}
-                            onChange={(e) => setCatalogSearch(e.target.value)}
-                            className="pl-8 h-9 text-xs"
-                          />
-                        </div>
-                        <Select
-                          value={catalogTypeFilter}
-                          onValueChange={(val) => setCatalogTypeFilter(val as any)}
-                        >
-                          <SelectTrigger className="h-9 min-w-32 text-xs">
-                            <SelectValue placeholder="Semua Tipe" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="all">Semua Tipe</SelectItem>
-                            <SelectItem value="magang">Magang Industri</SelectItem>
-                            <SelectItem value="stupen">Studi Independen</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                  </CardHeader>
-
-                  <CardContent>
-                    <div className="rounded-xl border bg-card">
-                      <Table>
-                        <TableHeader>
-                          <TableRow className="bg-muted/50">
-                            <TableHead className="w-12 text-center">No</TableHead>
-                            <TableHead>Perusahaan &amp; Sumber</TableHead>
-                            <TableHead>Role / Posisi</TableHead>
-                            <TableHead>Divisi</TableHead>
-                            <TableHead>Jenis</TableHead>
-                            <TableHead>Mode</TableHead>
-                            <TableHead>Kota</TableHead>
-                            <TableHead className="text-center">Aksi</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {filteredCatalog.map((item, idx) => (
-                            <TableRow key={item.id}>
-                              <TableCell className="text-center text-muted-foreground">{idx + 1}</TableCell>
-                              <TableCell className="font-semibold text-foreground max-w-[200px]">
-                                <div className="truncate">{item.company}</div>
-                                {item.isCustom ? (
-                                  <Badge variant="outline" className="text-[10px] py-0 px-1 border-primary/30 bg-primary/10 text-primary font-bold mt-0.5">
-                                    Data Admin
-                                  </Badge>
-                                ) : (
-                                  <span className="text-[10px] text-muted-foreground">Katalog Bawaan</span>
-                                )}
-                              </TableCell>
-                              <TableCell className="max-w-[160px] truncate">{item.role}</TableCell>
-                              <TableCell className="text-muted-foreground max-w-[140px] truncate">{item.division}</TableCell>
-                              <TableCell>
-                                <Badge
-                                  variant="outline"
-                                  className={`text-[10px] py-0 px-1.5 font-medium ${
-                                    item.type === "stupen"
-                                      ? "text-[var(--mi-cyan)] border-[var(--mi-cyan)]/30"
-                                      : "text-[var(--mi-orange)] border-[var(--mi-orange)]/30"
-                                  }`}
-                                >
-                                  {item.type === "stupen" ? "Stupen" : "Magang"}
-                                </Badge>
-                              </TableCell>
-                              <TableCell className="text-muted-foreground">{item.mode}</TableCell>
-                              <TableCell className="text-muted-foreground">{item.city}</TableCell>
-                              <TableCell className="text-center">
-                                {item.isCustom ? (
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-7 w-7 text-muted-foreground hover:text-destructive"
-                                    onClick={() => handleDeleteCustom(item.id)}
-                                    title="Hapus data custom ini"
-                                  >
-                                    <Trash size={15} />
-                                  </Button>
-                                ) : (
-                                  <span className="text-[10px] text-muted-foreground italic">Terkunci</span>
-                                )}
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </div>
                   </CardContent>
                 </Card>
               </TabsContent>
@@ -1147,6 +1392,127 @@ export default function AdminPage() {
                 </Card>
               </TabsContent>
             </Tabs>
+
+            {/* EDIT DIALOG MODAL (SHADCN DIALOG) */}
+            <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+              <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle className="text-base font-bold flex items-center gap-2">
+                    <Pencil size={18} className="text-primary" /> Ubah Data Lowongan
+                  </DialogTitle>
+                  <DialogDescription className="text-xs">
+                    Perubahan data akan disimpan langsung ke sistem dan katalog mahasiswa.
+                  </DialogDescription>
+                </DialogHeader>
+
+                {editingItem && (
+                  <form onSubmit={handleSaveEdit} className="space-y-4 pt-2">
+                    <div className="space-y-1.5">
+                      <Label>Nama Perusahaan / Instansi</Label>
+                      <Input
+                        value={editingItem.company}
+                        onChange={(e) => setEditingItem({ ...editingItem, company: e.target.value })}
+                        required
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="space-y-1.5">
+                        <Label>Posisi / Role</Label>
+                        <Input
+                          value={editingItem.role}
+                          onChange={(e) => setEditingItem({ ...editingItem, role: e.target.value })}
+                          required
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label>Divisi / Unit Kerja</Label>
+                        <Input
+                          value={editingItem.division}
+                          onChange={(e) => setEditingItem({ ...editingItem, division: e.target.value })}
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="space-y-1.5">
+                        <Label>Jenis Program</Label>
+                        <Select
+                          value={editingItem.type}
+                          onValueChange={(val) => setEditingItem({ ...editingItem, type: val as any })}
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="magang">Magang Industri</SelectItem>
+                            <SelectItem value="stupen">Studi Independen (Stupen)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <Label>Mode Pelaksanaan</Label>
+                        <Select
+                          value={editingItem.mode}
+                          onValueChange={(val) => setEditingItem({ ...editingItem, mode: val as any })}
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Mandiri">Mandiri</SelectItem>
+                            <SelectItem value="Tim">Tim / Kelompok</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="space-y-1.5">
+                        <Label>Kota / Lokasi</Label>
+                        <Input
+                          value={editingItem.city}
+                          onChange={(e) => setEditingItem({ ...editingItem, city: e.target.value })}
+                          required
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label>No. Telepon / WhatsApp</Label>
+                        <Input
+                          value={editingItem.phone}
+                          onChange={(e) => setEditingItem({ ...editingItem, phone: e.target.value })}
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <Label>Deskripsi / Keterangan</Label>
+                      <Textarea
+                        value={editingItem.description}
+                        onChange={(e) => setEditingItem({ ...editingItem, description: e.target.value })}
+                        className="min-h-20"
+                      />
+                    </div>
+
+                    <DialogFooter className="pt-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setIsEditDialogOpen(false)}
+                      >
+                        Batal
+                      </Button>
+                      <Button type="submit">
+                        Simpan Perubahan
+                      </Button>
+                    </DialogFooter>
+                  </form>
+                )}
+              </DialogContent>
+            </Dialog>
           </div>
         )}
       </div>

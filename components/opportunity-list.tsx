@@ -32,9 +32,39 @@ export function OpportunityList({ initialItems, defaultType = "all" }: Opportuni
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [activeFilterTab, setActiveFilterTab] = useState<"divisions" | "roles" | "categories">("divisions");
 
-  // Load custom/imported opportunities from admin session
+  // Load custom/imported opportunities from admin session & apply admin deletes/edits
   useEffect(() => {
     try {
+      const deletedRaw = localStorage.getItem("mi_admin_deleted_ids");
+      const deletedIds: string[] = deletedRaw ? JSON.parse(deletedRaw) : [];
+
+      const overridesRaw = localStorage.getItem("mi_admin_overrides");
+      const overrides: Record<string, any> = overridesRaw ? JSON.parse(overridesRaw) : {};
+
+      const baseFiltered = initialItems
+        .filter((item) => !deletedIds.includes(item.id))
+        .map((item) => {
+          const override = overrides[item.id];
+          if (!override) return item;
+          return {
+            ...item,
+            company: override.company || item.company,
+            roles: override.role ? [override.role] : item.roles,
+            divisions: override.division ? [override.division] : item.divisions,
+            type: override.type || item.type,
+            mode: override.mode || item.mode,
+            description: override.description || item.description,
+            location: {
+              ...item.location,
+              city: override.city || item.location.city,
+            },
+            contact: {
+              ...item.contact,
+              phone: override.phone || item.contact.phone,
+            },
+          };
+        });
+
       const customRaw = localStorage.getItem("mi_admin_custom_opportunities");
       if (customRaw) {
         const customParsed = JSON.parse(customRaw);
@@ -59,10 +89,12 @@ export function OpportunityList({ initialItems, defaultType = "all" }: Opportuni
             batch: c.batch || "Angkatan 2023 Semester Genap",
             description: c.description || `Praktik magang dan studi terpadu di ${c.company}.`,
           }));
-          setItems([...mapped, ...initialItems]);
+          setItems([...mapped, ...baseFiltered]);
           return;
         }
       }
+      setItems(baseFiltered);
+      return;
     } catch {
       // ignore
     }
